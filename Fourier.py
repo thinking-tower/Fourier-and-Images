@@ -2,6 +2,14 @@ import cv2
 import numpy as np
 from scipy.spatial.distance import cdist
 
+import cv2
+import numpy as np
+from scipy.spatial.distance import cdist
+
+import cv2
+import numpy as np
+from scipy.spatial.distance import cdist
+
 class Image(object):
     def __init__(self, img_loc, shape = None):
         
@@ -20,32 +28,119 @@ class Image(object):
         if self.img is not None:
 
             # Get the edges of the image
-            img = cv2.GaussianBlur(self.img, (5,5), 0)
-            edges = cv2.Canny(img, 100, 255)
+            #img = cv2.GaussianBlur(self.img, (5,5), 0)
+            edges = cv2.Canny(self.img, 100, 255)
 
             ret, thresh = cv2.threshold(edges, 127, 255, 0)
             _, contours, __ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-            # To simplify things, we only consider the start points of the detected contours
-            # Note that there are start.shape[0] number of elements that contain (x, y) coordinates
-            start, end = np.array([x[0] for x in contours]), np.array([x[-1] for x in contours])
-            start = start.reshape((start.shape[0], 2))
-            end = end.reshape((end.shape[0], 2))
+            return np.vstack([contours[idx][start::-1] if start and end is None and stride == -1
+                                                       else contours[idx] if start is None and end is None and stride == 1
+                                                       else contours[idx][:end:-1] if start is None and end and stride == -1
+                                                       else contours[idx][start:end:stride] for idx, (start, end, stride) in self.sort(contours)])
 
-            # Ignore distance between itself (which is trivially 0)
-            dist = cdist(start, end)
-            np.fill_diagonal(dist, np.inf)
+    def sort(self, contours):
 
-            sort_args = dist.argsort(axis = 1)[:, :-1]
-            dist = dist[np.arange(start.shape[0])[:,np.newaxis], sort_args]
+        order = []
 
-            return np.vstack([contours[idx] for idx in sort(sort_args, dist)])
+        stack = [(0, 0)]
+        connections = self.find_connections(contours)
 
-    def sort(self, args, dist): pass
+        from bisect import bisect
+        while stack:
+
+            start, contour = stack.pop()
+
+            if connections[contour]:
+                # Go left then right
+                pos = bisect([tup[0][0] for tup in connections[contour]], start)
+                connection = connections[contour].pop(pos - 1 if pos > 0  else pos)
+                order.append((contour, (start, connection[0][0]+1, 1) if connection[0][0]+1 > start else (start, connection[0][0]-1 if connection[0][0] > 0 else 0, -1)))
+                stack.append((connection[0][0], contour))
+                
+                if connection[1] in connections:
+                    stack.append((connection[0][1], connection[1]))
+                else:
+                    order.append((connection[1], (connection[0][1], None, -1)))
+                    order.append((connection[1], (None, None, 1)))
+                    order.append((connection[1], (None, connection[0][1], -1)))
+            else:
+                order.append((contour, (start, None, 1)))
+                order.append((contour, (None, start-1 if start else None, -1)))
+
+        return order
+
+    def find_connections(self, contours):
+                                              
+        points = np.vstack(contours)
+        points = points.reshape((points.shape[0], 2))
         
+        dist = cdist(points, points)
+        
+        len_arr    = np.array([len(contour) for contour in contours], dtype = np.int_)
+        end_points = np.add.accumulate(len_arr)
 
+        start     = 0
+        start_end = []
+        for end in end_points:
+            dist[start:end:, start:end:] = np.inf
+            start_end.append((start, end))
+            start = end
+    
+        from collections import defaultdict
+        connections = defaultdict(list)
+        temp_order = [0]
+        temp_start_end  = [start_end[0]]
+        temp_dist = dist[start_end[0][0]:start_end[0][1]]
         
-        
+        # The first connection connects two contours, and the rest connects only one contour
+        while len(temp_order) < end_points.size - 1:
+
+            row_min = np.argmin(temp_dist, axis = 0)
+            cols = np.indices(row_min.shape)
+            col_min = np.argmin(temp_dist[row_min, cols])
+            
+            temp_row, temp_col = row_min[col_min], col_min
+            temp_idx_from = self.find_contour_index(temp_row, temp_start_end)
+            idx_from = temp_order[temp_idx_from]
+            row = temp_row - temp_start_end[temp_idx_from][0] + start_end[idx_from][0]
+            row -= start_end[idx_from][0]
+            idx_to = self.find_contour_index(temp_col, start_end)
+            col = temp_col - start_end[idx_to][0]
+
+            #print(contours[idx_from][row], contours[idx_to][col])
+            
+            connections[idx_from].append(((row, col), idx_to))
+
+            for order in temp_order:
+                start = start_end[order][0]
+                end = start_end[order][1]
+                dist[start:end:, start_end[idx_to][0]:start_end[idx_to][1]:] = np.inf
+                dist[start_end[idx_to][0]:start_end[idx_to][1]:, start:end:] = np.inf
+
+            temp_order.append(idx_to)
+
+            temp_len_arr    = np.array([len(contours[order]) for order in temp_order], dtype = np.int_)
+            temp_end_points = np.add.accumulate(temp_len_arr)
+
+            temp_start     = 0
+            temp_start_end = []
+            for temp_end in temp_end_points:
+                temp_start_end.append((temp_start, temp_end))
+                temp_start = temp_end
+                
+            temp_dist = dist[np.hstack([np.arange(start_end[order][0], start_end[order][1]) for order in temp_order])]
+
+        for idx in connections:
+            connections[idx].sort(key = lambda x: x[0][0])
+
+        return connections
+
+    def find_contour_index(self, idx, start_end):
+        for i, (start, end) in enumerate(start_end):
+            if start <= idx < end:
+                return i
+        return len(start_end) - 1
         
 from matplotlib import animation
 from matplotlib import pyplot as plt
@@ -71,7 +166,7 @@ class Fourier(object):
             if self.complex_coord_2.size > self.complex_coord_1.size:
                 self.complex_coord_1 = np.hstack((self.complex_coord_1, np.zeros((self.complex_coord_2.size - self.complex_coord_1.size), dtype = np.complex_)))
             elif self.complex_coord_1.size > self.complex_coord_2.size:
-                self.complex_coord_2 = np.hstack((self.complex_coord_1, np.zeros((self.complex_coord_1.size - self.complex_coord_2.size), dtype = np.complex_)))
+                self.complex_coord_2 = np.hstack((self.complex_coord_2, np.zeros((self.complex_coord_1.size - self.complex_coord_2.size), dtype = np.complex_)))
 
     def draw(self, n_approximations = 500, speed = 1, mode = 1):
         
@@ -251,8 +346,8 @@ class Fourier(object):
         return fourier_coeff * np.exp(1j * ((2*multiple*np.pi/period) * time))
 
     
-a = Image("gpe.jpg", (200, 200))
+a = Image("gpe.jpg")#, (100, 100))
 b = Image("pikachu.png", (200, 200))
 x = a.find_path()
 y = b.find_path()
-Fourier(b.get_size(), x, y).draw(500, speed = 10, mode = 1)
+Fourier(a.get_size(), x).draw(2000, speed = 10, mode = 1)
