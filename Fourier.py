@@ -43,30 +43,37 @@ class Image(object):
 
         order = []
 
-        stack = [(0, 0)]
+        stack = [(0, 0, None)]
         connections = self.find_connections(contours)
 
         from bisect import bisect
         while stack:
 
-            start, contour = stack.pop()
+            start, contour, original = stack.pop()
 
             if connections[contour]:
                 # Go left then right
                 pos = bisect([tup[0][0] for tup in connections[contour]], start)
                 connection = connections[contour].pop(pos - 1 if pos > 0  else pos)
                 order.append((contour, (start, connection[0][0]+1, 1) if connection[0][0]+1 > start else (start, connection[0][0]-1 if connection[0][0] > 0 else 0, -1)))
-                stack.append((connection[0][0], contour))
+                stack.append((connection[0][0], contour, original))
                 
                 if connection[1] in connections:
-                    stack.append((connection[0][1], connection[1]))
+                    if len(connections[connection[1]]) > 1:
+                        stack.append((connection[0][1], connection[1], connection[0][1]))
+                    else:
+                        stack.append((connection[0][1], connection[1], None))
                 else:
                     order.append((connection[1], (connection[0][1], None, -1)))
                     order.append((connection[1], (None, None, 1)))
                     order.append((connection[1], (None, connection[0][1], -1)))
             else:
-                order.append((contour, (start, None, 1)))
-                order.append((contour, (None, start-1 if start else None, -1)))
+                if original:
+                    order.append((contour, (start, None, 1)))
+                    order.append((contour, (None, original - 1 if original else None, -1)))
+                else:
+                    order.append((contour, (start, None, 1)))
+                    order.append((contour, (None, start-1 if start else None, -1)))
 
         return order
 
@@ -180,6 +187,7 @@ class Fourier(object):
                 axes = {i: fig.add_subplot(int(j)) for i, j in zip(range(3), ("224", "222", "221"))}
 
             final_points, lst_circles_lst, lst_circles_loc, period, largest_radius = self.get_circles(axes, n_approximations, mode = mode)
+            
             
             def update(i):
                 for n, circles_lst in enumerate(lst_circles_lst):
@@ -346,8 +354,8 @@ class Fourier(object):
         return fourier_coeff * np.exp(1j * ((2*multiple*np.pi/period) * time))
 
     
-a = Image("gpe.jpg")#, (100, 100))
+a = Image("afg.jpg", (200, 200))
 b = Image("pikachu.png", (200, 200))
 x = a.find_path()
 y = b.find_path()
-Fourier(a.get_size(), x).draw(2000, speed = 10, mode = 1)
+Fourier(a.get_size(), x, y).draw(2000, speed = 1000, mode = 1)
