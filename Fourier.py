@@ -77,6 +77,7 @@ class Fourier(object):
         if self.n_images == 1 and mode == 1:
             axes = {0: fig.add_subplot(111)}
             final_points, lst_circles_lst, lst_circles_loc = self.get_one_circle_one_image(axes, n_approximations)
+            con1 = con2 = con3 = con4 = None
         elif self.n_images == 1 and mode == 2:
             axes = {i: fig.add_subplot(int(j)) for i, j in zip(range(4), ("224", "222", "221", "223"))}
             final_points, lst_circles_lst, lst_circles_loc = self.get_two_circles_one_image(axes, n_approximations)
