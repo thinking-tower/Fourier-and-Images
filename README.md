@@ -32,6 +32,7 @@ im = Image("einstein.jpg", (200, 200))
 path = im.sort()
 Fourier(path).draw(1000, speed = 8, mode = 2, save = False)
 ```
+Note that the circle on the bottom left is NOT drawing any particular image.
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/einstein.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/einstein.gif "Einstein")
 
@@ -49,7 +50,7 @@ Fourier(path_1, path_2).draw(1000, speed = 8, mode = 1, save = False)
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/dickbutt_formula.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/dickbutt_formula.gif "Dickbutt and Euler's Formula")
 
-> Dickbutt and Euler's Formula"
+> Dickbutt and Euler's Formula
 
 Getting visualization of how number of Fourier Series terms affects the image:
 ```
