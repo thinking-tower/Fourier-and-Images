@@ -5,6 +5,7 @@ Fourier and Images is a project that tries to draw images with circles.
 ## Requirements
 ```
 Python 3.x
+Matplotlib
 OpenCV
 Scipy
 Numpy
@@ -66,5 +67,10 @@ Too big of an image might cause your computer to freeze! Resizing the image to (
 
 # Animation
 Anything above 1000 n_approximations takes a bit of time to animate. Recommend speed = 8.
+
+# Improvements
+1) Using FFT to calculate the Fourier Series coefficients
+2) Improve edge detection algorithm
+3) Improve the function(s) that order the points from the edge detection algorithm
 
 Have fun!
