@@ -67,10 +67,10 @@ Fourier(path_5).visualize(save = False, ani_name = "im5.gif")
 Too big of an image might cause your computer to freeze! Resizing the image to (200, 200) is a safe choice and anything above (500, 500) starts to get a bit sketchy.
 
 # Animation
-Anything above 1000 n_approximations takes a bit of time to animate. Recommend speed = 8.
+Anything above 1000 n_approximations takes a bit of time to animate. Recommend speed = 8. In this setting, saving the animation takes about 10 minutes.
 
 # Improvements
-1) Using FFT to calculate the Fourier Series coefficients
+1) Use FFT to calculate the Fourier Series coefficients
 2) Improve edge detection algorithm
 3) Improve the function(s) that order the points from the edge detection algorithm
 
