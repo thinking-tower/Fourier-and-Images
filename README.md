@@ -56,7 +56,7 @@ Getting visualization of how number of Fourier Series terms affects the image:
 ```
 im = Image("images/obama.jpg", (200, 200))
 path = im.sort()
-Fourier(path_5).visualize(save = False, ani_name = "im5.gif")
+Fourier(path).visualize(save = False)
 ```
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/obama.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/obama.gif "Obama")
