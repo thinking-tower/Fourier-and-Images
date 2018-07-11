@@ -213,7 +213,7 @@ class Fourier(object):
         circles_rad_1 = np.zeros((2*(n_approximations-1)), dtype = np.float_)
 
         for idx, multiple in enumerate(chain(range(-n_approximations+1, 0), range(1, n_approximations))):
-            
+            # Fourier coefficient
             cn_1 = self.cn(time, period, multiple, self.complex_coord_1)
             circles_rad_1[idx] = np.absolute(cn_1)
             circles_loc_1[idx, :] = self.polar_locations(time, period, multiple, cn_1)
@@ -256,7 +256,7 @@ class Fourier(object):
             an_1, bn_1 = cn_1.real, cn_1.imag
 
             circles_rad_1[idx] = np.absolute(an_1)
-            circles_rad_2[idx+n_approximations-1] = np.absolute(bn_1)
+            circles_rad_1[idx+n_approximations-1] = np.absolute(bn_1)
             
             circles_loc_1[idx, :] = self.cartesian_locations(time, period, multiple, an_1)
             circles_loc_1[idx+n_approximations-1, :] = self.cartesian_locations(time, period, multiple, bn_1)
@@ -268,8 +268,8 @@ class Fourier(object):
             cn_2 = self.cn(time, period, multiple, self.complex_coord_1.imag)
             an_2, bn_2 = cn_2.real, cn_2.imag
 
-            circles_rad_1[idx] = np.absolute(an_2)
-            circles_rad_2[idx+n_approximations-1] = np.absolute(bn_2)
+            circles_rad_2[idx] = np.absolute(bn_2)
+            circles_rad_2[idx+n_approximations-1] = np.absolute(an_2)
             
             circles_loc_2[idx, :] = self.cartesian_locations(time, period, multiple, bn_2)
             circles_loc_2[idx+n_approximations-1, :] = self.cartesian_locations(time, period, multiple, an_2)
