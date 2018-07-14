@@ -18,7 +18,8 @@ Getting one set of circles with one image:
 ```
 im = Image("pikachu.png", (200, 200))
 path = im.sort()
-Fourier(path).draw(1000, speed = 8, mode = 1, save = False)
+period, tup_circle_rads, tup_circle_locs = Fourier(n_approx = 1000, coord_1 = path).get_circles()
+Plot(period, tup_circle_rads, tup_circle_locs, speed = 8).plot()
 ```
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/pikachu.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/pikachu.gif "Pikachu")
