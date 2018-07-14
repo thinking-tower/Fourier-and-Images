@@ -2,8 +2,6 @@ import numpy as np
 
 from matplotlib import animation
 from matplotlib import pyplot as plt
-
-# Image.draw
 from matplotlib.patches import ConnectionPatch
 
 class Plot(object):
