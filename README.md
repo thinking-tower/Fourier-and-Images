@@ -46,7 +46,7 @@ im_1 = Image("images/formula.jpeg", (200, 200))
 im_2 = Image("images/dickbutt.jpg", (200, 200))
 path_1 = im_1.sort()
 path_2 = im_2.sort()
-period_, tup_circle_rads, tup_circle_locs = Fourier(n_approx = 1000, coord_1 = path_1, coord_2 = path_2).get_circles()
+period, tup_circle_rads, tup_circle_locs = Fourier(n_approx = 1000, coord_1 = path_1, coord_2 = path_2).get_circles()
 Plot(period, tup_circle_rads, tup_circle_locs, speed = 8).plot()
 ```
 
@@ -59,7 +59,7 @@ Getting visualization of how number of Fourier Series terms affects the image:
 im = Image("images/obama.jpg", (200, 200))
 path = im.sort()
 period, tup_circle_rads, tup_circle_locs = Fourier(coord_1 = path).get_circles()
-Plot(period_4, tup_circle_rads, tup_circle_locs, visualize = True).plot()
+Plot(period, tup_circle_rads, tup_circle_locs, visualize = True).plot()
 ```
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/obama.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/obama.gif "Obama")
