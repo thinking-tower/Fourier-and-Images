@@ -30,7 +30,8 @@ Getting two sets of circles with one image:
 ```
 im = Image("einstein.jpg", (200, 200))
 path = im.sort()
-Fourier(path).draw(1000, speed = 8, mode = 2, save = False)
+period, tup_circle_rads, tup_circle_locs = Fourier(n_approx = 1000, coord_1 = path).get_circles(mode=2)
+Plot(period, tup_circle_rads, tup_circle_locs, speed = 8).plot()
 ```
 Note that the circle on the bottom left is NOT drawing any particular image.
 
@@ -44,8 +45,8 @@ im_1 = Image("images/formula.jpeg", (200, 200))
 im_2 = Image("images/dickbutt.jpg", (200, 200))
 path_1 = im_1.sort()
 path_2 = im_2.sort()
-# Note setting mode to 2 here doesn't change anything
-Fourier(path_1, path_2).draw(1000, speed = 8, mode = 1, save = False)
+period_, tup_circle_rads, tup_circle_locs = Fourier(n_approx = 1000, coord_1 = path_1, coord_2 = path_2).get_circles()
+Plot(period, tup_circle_rads, tup_circle_locs, speed = 8).plot()
 ```
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/dickbutt_formula.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/dickbutt_formula.gif "Dickbutt and Euler's Formula")
@@ -56,7 +57,8 @@ Getting visualization of how number of Fourier Series terms affects the image:
 ```
 im = Image("images/obama.jpg", (200, 200))
 path = im.sort()
-Fourier(path).visualize(save = False)
+period, tup_circle_rads, tup_circle_locs = Fourier(coord_1 = path).get_circles()
+Plot(period_4, tup_circle_rads, tup_circle_locs, visualize = True).plot()
 ```
 
 [![](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/obama.gif)](https://github.com/thinking-tower/Fourier-and-Images/blob/master/example_gifs/obama.gif "Obama")
