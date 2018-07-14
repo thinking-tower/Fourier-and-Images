@@ -7,17 +7,13 @@ from bisect import bisect
 from scipy.spatial.distance import cdist
 from collections import defaultdict
 
-
 class Image(object):
-    
     def __init__(self, img_loc, shape = None):
-        
         self.img = cv2.imread(img_loc)
         if shape:
             self.img = cv2.resize(self.img, shape)
 
     def sort(self):
-
         contours = self.find_contours()
         return np.vstack([contours[idx][start::-1] if start is None and end is None and stride == -1
                                                    else contours[idx] if start is None and end is None and stride == 1
@@ -25,7 +21,6 @@ class Image(object):
                                                    else contours[idx][start:end:stride] for idx, (start, end, stride) in self.find_order(contours)])
     
     def find_contours(self):
-
 #       img = cv2.GaussianBlur(self.img, (5,5), 0)
         edges = cv2.Canny(self.img, 100, 255)
         ret, thresh = cv2.threshold(edges, 127, 255, 0)
@@ -34,8 +29,9 @@ class Image(object):
         return contours
 
     def find_order(self, contours):
-
-        # Basically a "recursive" function to connect contours.
+        # This function was written as recursive originally.
+        # This function obtains a dictionary of connections from find_paths(contours)
+        # and "recursively" goes through the dictionary to find the slice notations that connects all contours together.
         order = []
         stack = [(0, 0, 0)]
         paths = self.find_paths(contours)
@@ -47,7 +43,7 @@ class Image(object):
                 # Check connections to the left and then to the right
                 next_contour, (start, end) = paths[cur_contour].pop(pos-1 if pos>0 else 0)
                 # Order imitates slicing notation
-                # For example, (cur_pos, start+1, 1) indicates a slice of cur_pos:path[0]+1:1
+                # For example, (cur_pos, start+1, 1) indicates a slice of cur_pos:start+1:1
                 order.append((cur_contour, (cur_pos, start+1, 1) if start+1 > cur_pos else (cur_pos, start-1 if start>0 else None, -1)))
                 stack.append((cur_contour, start, original_pos))
                 if next_contour in paths:
@@ -63,7 +59,12 @@ class Image(object):
         return order
 
     def find_paths(self, contours):
-                                              
+        # This function first gets a distance matrix from cdist(points, points)
+        # Then consider a "blob" that contains contours[0] (all the points of contours[0])
+        # This function then uses that distance matrix to find the closest point to blob
+        # And then adding said closest point into the blob because it is now connected
+        # And then ignoring said closest point's distance to the blob and vice versa by setting the distance in the distance matrix to np.inf.
+        # Finally construct a dictionary of connections.
         points = np.vstack(contours)
         points = points.reshape((points.shape[0], 2))
         dist = cdist(points, points)
