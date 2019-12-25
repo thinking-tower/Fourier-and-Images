@@ -72,47 +72,53 @@ class Plot(object):
     def get_final_point(self, axis):
         return axis.plot(0,0, color='#000000')[0]
     
-    def plot(self, save = False, ani_name = None, ImageMagickLoc = None):
+    def plot(self, save = False, ani_name = None, ImageMagickLoc = None, close_after_animation = True):
         if self.visualize:
             self.get_visualize()
         else:
-            self.get_draw()
+            update, time = self.get_draw(close_after_animation=close_after_animation, save=save)
         for ax in self.axes:
             ax.set_xlim(self.x_lim)
             ax.set_ylim(self.y_lim)
-        ani = animation.FuncAnimation(self.fig, self.update, self.time, interval=1, blit=True)
+        ani = animation.FuncAnimation(self.fig, update, time, interval=1, blit=True, repeat=close_after_animation)
         if save is True and ImageMagickLoc is not None:
             plt.rcParams['animation.convert_path'] = ImageMagickLoc
             writer = animation.ImageMagickFileWriter(fps = 100)
             ani.save(ani_name if ani_name else 'gif_1.gif', writer=writer)
         else:
-            plt.show()
+            # TODO(Darius): Figure out a way to get Matplotlib to close the figure nicely after animation is done
+            try:
+                plt.show()
+            except e as Exception: # _tkinter.TclError: invalid command name "pyimage10"
+                pass
 
         plt.clf()
         plt.cla()
         plt.close()
         
-    def get_draw(self):
+    def get_draw(self, close_after_animation, save):
+        time = np.arange(0, self.period, self.speed)
         def update(i):
-            for n_1, circles_tup in enumerate(self.tup_circles_lst):
-                for n_2, circle in enumerate(circles_tup):
-                    circle.center = self.get_circle_loc_point(n_1, n_1, circle_idx=n_2, time_idx = i)
-            if len(self.tup_circles_lst) == 2:
-                self.final_points[0].set_data(self.get_circle_loc_slice(0, 1, -1, i))
-                self.final_points[1].set_data(self.get_circle_loc_slice(1, 0, -1, i))
-                for con_patch in self.con_patch_tup:
-                    con_patch.remove()
-                # For readability, not using tuple comprehension
-                con_patch_lst = []
-                for ((idx_1, idx_2), (idx_3, idx_4)), (axesA, axesB) in zip(zip([(0,0)]*2 + [(1,1)]*2, [(0,1), (1,0)]*2), zip([0]*2+[2]*2, [1,3]*2)):
-                    con_patch_lst.append(self.get_con_patch(self.get_circle_loc_point(idx_1, idx_2, -1, i), self.get_circle_loc_point(idx_3, idx_4, -1, i), axesA, axesB))
-                self.con_patch_tup = tuple(con_patch_lst)
-                self.add_con_patch(self.con_patch_tup)
+            if close_after_animation and not save and i == time[-1]:
+                plt.close()
             else:
-                self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, -1, i))
+                for n_1, circles_tup in enumerate(self.tup_circles_lst):
+                    for n_2, circle in enumerate(circles_tup):
+                        circle.center = self.get_circle_loc_point(n_1, n_1, circle_idx=n_2, time_idx = i)
+                if len(self.tup_circles_lst) == 2:
+                    self.final_points[0].set_data(self.get_circle_loc_slice(0, 1, -1, i))
+                    self.final_points[1].set_data(self.get_circle_loc_slice(1, 0, -1, i))
+                    for con_patch in self.con_patch_tup:
+                        con_patch.remove()
+                    con_patch_lst = []
+                    for ((idx_1, idx_2), (idx_3, idx_4)), (axesA, axesB) in zip(zip([(0,0)]*2 + [(1,1)]*2, [(0,1), (1,0)]*2), zip([0]*2+[2]*2, [1,3]*2)):
+                        con_patch_lst.append(self.get_con_patch(self.get_circle_loc_point(idx_1, idx_2, -1, i), self.get_circle_loc_point(idx_3, idx_4, -1, i), axesA, axesB))
+                    self.con_patch_tup = tuple(con_patch_lst)
+                    self.add_con_patch(self.con_patch_tup)
+                else:
+                    self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, -1, i))
             return ([])
-        self.time = np.arange(0, self.period, self.speed)
-        self.update = update
+        return update, time
         
     def get_circle_loc_point(self, idx_1, idx_2, circle_idx, time_idx):
         return (self.tup_circles_loc[idx_1][circle_idx, time_idx].real, self.tup_circles_loc[idx_2][circle_idx, time_idx].imag)

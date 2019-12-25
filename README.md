@@ -1,16 +1,15 @@
 # Fourier and Images
 
+[![Build Status](https://travis-ci.com/thinking-tower/Fourier-and-Images.svg?branch=master)](https://travis-ci.com/thinking-tower/Fourier-and-Images)
+
 Fourier and Images is a project that tries to draw images with circles.
 
-## Requirements
-```
-Python 3.x
-Matplotlib
-OpenCV
-Scipy
-Numpy
-ImageMagick # Only if you want to save to a gif!
-```
+## Setup
+1. `pip3 install -r requirements.txt`
+1. Modify `main.py` to reflect where your images are.
+1. `python3 main.py`
+
+Note that you'll need ImageMagick only if you want to save stuff to a gif.
 
 ## Example 
 

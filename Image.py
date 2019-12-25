@@ -24,7 +24,7 @@ class Image(object):
 #       img = cv2.GaussianBlur(self.img, (5,5), 0)
         edges = cv2.Canny(self.img, 100, 255)
         ret, thresh = cv2.threshold(edges, 127, 255, 0)
-        _, contours, __ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, __ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours
 
