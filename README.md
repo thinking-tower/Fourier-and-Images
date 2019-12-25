@@ -1,5 +1,7 @@
 # Fourier and Images
 
+[![Build Status](https://travis-ci.com/thinking-tower/Fourier-and-Images.svg?branch=master)](https://travis-ci.com/thinking-tower/Fourier-and-Images)
+
 Fourier and Images is a project that tries to draw images with circles.
 
 ## Setup
